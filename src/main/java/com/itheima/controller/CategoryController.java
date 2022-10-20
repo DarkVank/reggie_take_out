@@ -79,11 +79,14 @@ public class CategoryController {
         return R.success("删除成功");
     }
 
+    /**
+     * 分类数据获取
+     * @return
+     */
     @GetMapping("/list")
-    public R<List<Category>> list(Category category){
+    public R<List<Category>> list(){
 
         LambdaQueryWrapper<Category> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Category::getType,category.getType());
         List<Category> list = categoryService.list(queryWrapper);
 
         return R.success(list);

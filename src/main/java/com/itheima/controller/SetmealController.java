@@ -32,6 +32,24 @@ public class SetmealController {
     private CategoryService categoryService;
 
     /**
+     * 套餐菜品展示
+     * @param setmeal
+     * @return
+     */
+    @GetMapping("/list")
+    public R<List<Setmeal>> list(Setmeal setmeal){
+        log.info("分类id:{}",setmeal.getCategoryId());
+
+        //获取套餐
+        LambdaQueryWrapper<Setmeal> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Setmeal::getCategoryId,setmeal.getCategoryId());
+        queryWrapper.eq(Setmeal::getStatus,setmeal.getStatus());
+
+        List<Setmeal> setmealList = setmealService.list(queryWrapper);
+
+        return R.success(setmealList);
+    }
+    /**
      * 修改套餐状态
      * @param status
      * @param ids

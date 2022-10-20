@@ -7,7 +7,9 @@ import com.itheima.common.R;
 import com.itheima.dto.DishDto;
 import com.itheima.entity.Category;
 import com.itheima.entity.Dish;
+import com.itheima.entity.DishFlavor;
 import com.itheima.service.CategoryService;
+import com.itheima.service.DishFlavorService;
 import com.itheima.service.DishService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
@@ -25,6 +27,9 @@ public class DishController {
 
     @Autowired
     private DishService dishService;
+
+    @Autowired
+    private DishFlavorService dishFlavorService;
 
     @Autowired
     private CategoryService categoryService;
@@ -60,7 +65,7 @@ public class DishController {
      * @return
      */
     @GetMapping("/list")
-    public R<List<Dish>> list(Dish dish){
+    public R<List<DishDto>> list(Dish dish){
         log.info("新增套餐回显菜品的分类id{}",dish.getCategoryId());
 
         LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
@@ -68,7 +73,24 @@ public class DishController {
         queryWrapper.eq(Dish::getStatus,1);
 
         List<Dish> dishList = dishService.list(queryWrapper);
-        return R.success(dishList);
+
+        //查询口味信息
+        List<DishDto> dishDtoList = dishList.stream().map((item) -> {
+            //拷贝数据
+            DishDto dishDto = new DishDto();
+            BeanUtils.copyProperties(item, dishDto);
+
+            //获取菜品口味i信息
+            Long dishId = item.getId();
+            LambdaQueryWrapper<DishFlavor> queryWrapper1 = new LambdaQueryWrapper<>();
+            queryWrapper1.eq(DishFlavor::getDishId, dishId);
+            List<DishFlavor> dishFlavors = dishFlavorService.list(queryWrapper1);
+
+            dishDto.setFlavors(dishFlavors);
+
+            return dishDto;
+        }).collect(Collectors.toList());
+        return R.success(dishDtoList);
     }
 
     /**
